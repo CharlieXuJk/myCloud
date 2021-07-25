@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"myCloud/meta"
+	"myCloud/util"
 	"net/http"
 	"os"
+	"time"
 )
 
 func UploadHandler(w http.ResponseWriter, r *http.Request){
@@ -26,6 +30,12 @@ func UploadHandler(w http.ResponseWriter, r *http.Request){
 		}
 		defer file.Close()
 
+		fileMeta := meta.FileMeta{
+			FileName:head.Filename,
+			Location:"./tmp/" + head.Filename,
+			Timestamp: time.Now().Format("2021-07-25 15:44:00"),
+		}
+
 		//create a new file, later will be used for copy
 		newFile,err:=os.Create("./tmp/"+head.Filename)
 		if err!=nil{
@@ -34,13 +44,32 @@ func UploadHandler(w http.ResponseWriter, r *http.Request){
 		}
 		defer newFile.Close()
 
-		_, err = io.Copy(newFile, file)
+		fileMeta.FileSize, err = io.Copy(newFile, file)
 		if err!=nil{
 			fmt.Printf("Failed to save data to file, err:%s\n", err.Error())
 			return
 		}
+
+		newFile.Seek(0,0)
+		fileMeta.FileSha1 = util.FileSha1(newFile)
+
+		http.Redirect(w, r, "/file/upload/suc", http.StatusFound )
 	}
+}
 
+func SucceedHandler(w http.ResponseWriter, r *http.Request){
+	io.WriteString(w, "Upload finished")
+}
 
+func GetFileMetaHandler(w http.ResponseWriter, r *http.Request){
+	r.ParseForm()
 
+	filehash := r.Form["filehash"][0]
+	fMeta := meta.GetFileMeta(filehash)
+	data, err := json.Marshal(fMeta)
+	if err!=nil{
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(data)
 }
