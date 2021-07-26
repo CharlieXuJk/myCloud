@@ -14,7 +14,7 @@ func init() {
 	fileMetas = make(map[string]FileMeta)
 }
 
-func updateFileMeta(fileMeta FileMeta){
+func UpdateFileMeta(fileMeta FileMeta){
 	fileMetas[fileMeta.FileSha1] = fileMeta
 }
 

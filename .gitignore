@@ -3,6 +3,7 @@
 *.ipr
 *.iws
 tmp/
+config/
 .idea/
 
 # go.gitignore from https://github.com/github/gitignore/blob/master/Go.gitignore
