@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"myCloud/meta"
+	"myCloud/store/ceph"
 	"myCloud/util"
 	"net/http"
 	"os"
@@ -52,6 +53,12 @@ func UploadHandler(w http.ResponseWriter, r *http.Request){
 
 		newFile.Seek(0,0)
 		fileMeta.FileSha1 = util.FileSha1(newFile)
+
+		//write files to ceph
+		newFile.Seek(0,0)
+		data,_:=ioutil.ReadFile(newFile)
+		bucket:=ceph.GetCephBucket("userfile")
+		cephPath :="/ceph"/a"47.102.123.183:9080"+
 
 		http.Redirect(w, r, "/file/upload/suc", http.StatusFound )
 	}
