@@ -37,8 +37,7 @@ func OnUserFileUploadFinished(username, filehash, filename string, filesize int6
 //get a user's files
 func QueryUserFileMetas(username string, limit int)([]UserFile, error){
 	stmt,err := mysql.DBConn().Prepare(
-		"SELECT file_sha1,file_name,file_size,upload_at,last_update FROM"+
-			"tbl_user_file WHERE user_name=?LIMIT?")
+		"SELECT file_sha1,file_name,file_size,upload_at,last_update FROM tbl_user_file WHERE user_name=?LIMIT?")
 	if err != nil{
 		return nil,err
 	}
@@ -59,4 +58,5 @@ func QueryUserFileMetas(username string, limit int)([]UserFile, error){
 		}
 		userFiles=append(userFiles, ufile)
 	}
+	return userFiles, nil
 }
