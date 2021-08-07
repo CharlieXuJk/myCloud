@@ -3,6 +3,7 @@ package ceph
 import (
 	"gopkg.in/amz.v1/aws"
 	"gopkg.in/amz.v1/s3"
+	"myCloud/config"
 )
 
 var cephConn *s3.S3
@@ -14,13 +15,14 @@ func GetCephConnection() *s3.S3{
 	//init some information of ceph
 
 	auth := aws.Auth{
-		AccessKey:
+		AccessKey: config.CephAccessKey,
+		SecretKey: config.CephSecretKey,
 	}
 
-	aws.Region{
+	curRegion:=aws.Region{
 		Name:"default",
-		EC2Endpoint: "47.102.123.183:9080",  //7480?
-		S3Endpoint: "47.102.123.183:9080",
+		EC2Endpoint: "http://47.102.123.183:7480",  //7480?
+		S3Endpoint: "http://47.102.123.183:7480",
 		S3BucketEndpoint: "",
 		S3LocationConstraint: false,
 		S3LowercaseBucket: false,
