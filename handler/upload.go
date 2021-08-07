@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"myCloud/config"
+	"myCloud/db"
 	"myCloud/meta"
 	"myCloud/store/ceph"
 	"myCloud/util"
@@ -59,6 +61,29 @@ func UploadHandler(w http.ResponseWriter, r *http.Request){
 		data,_:=ioutil.ReadFile(newFile)
 		bucket:=ceph.GetCephBucket("userfile")
 		cephPath :="/ceph"/a"47.102.123.183:9080"+
+
+		if config.CurrentStoreType == config.StoreCeph {
+			// 文件写入Ceph存储
+			data, _ := ioutil.ReadAll(newFile)
+			cephPath := "/ceph/" + fileMeta.FileSha1
+			_ = ceph.PutObject("userfile", cephPath, data)
+			fileMeta.Location = cephPath
+		}
+
+		// meta.UpdateFileMeta(fileMeta)
+		_ = meta.UpdateFileMetaDB(fileMeta)
+
+		// 更新用户文件表记录
+		r.ParseForm()
+		username := r.Form.Get("username")
+		suc := db.OnUserFileUploadFinished(username, fileMeta.FileSha1, fileMeta.FileName, fileMeta.FileSize)
+		if suc {
+			http.Redirect(w, r, "/static/view/home.html", http.StatusFound)
+		} else {
+			w.Write([]byte("Upload Failed."))
+		}
+	}
+}
 
 		http.Redirect(w, r, "/file/upload/suc", http.StatusFound )
 	}
